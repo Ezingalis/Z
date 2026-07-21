@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fuel Protocol</title>
+<meta name="theme-color" content="#0A0C10">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fuel Protocol">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23A8FF3E' d='M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5z'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%230A0C10'/%3E%3Cpath fill='%23A8FF3E' d='M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5z'/%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#0A0C10; --panel:#12161D; --panel2:#171C25; --raised:#1C2230; --border:#232A35;
+    --lime:#A8FF3E; --limeDim:rgba(168,255,62,.14); --amber:#F6A93B; --blue:#5CC8FF; --violet:#C77DFF; --pink:#FF7D9C;
+    --text:#E7ECF3; --muted:#8A94A6; --faint:#5B6472;
+    --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;background:radial-gradient(1100px 500px at 50% -8%,#141a24 0%,var(--bg) 60%) no-repeat,var(--bg);
+    background-attachment:fixed;color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    min-height:100vh;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);}
+  .wrap{max-width:720px;margin:0 auto;padding:22px 16px 70px}
+  h1{font-size:21px;font-weight:800;letter-spacing:-.3px;margin:0;display:flex;align-items:center;gap:9px}
+  h1 .dim{color:var(--faint);font-weight:600;font-size:15px}
+  .sub{font-family:var(--mono);color:var(--muted);font-size:12px;margin:3px 0 18px 30px}
+  .row{display:flex;gap:8px;flex-wrap:wrap}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  .tab{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:10px;font-weight:700;font-size:13px;
+    background:transparent;border:1px solid var(--border);color:var(--muted);transition:all .18s}
+  .tab.on{background:var(--raised);border-color:var(--lime);color:var(--lime)}
+  .pill{padding:8px 14px;border-radius:9px;font-weight:700;font-size:13px;background:var(--panel2);
+    border:1px solid var(--border);color:var(--muted);transition:all .18s;text-align:center}
+  .pill.on{background:var(--lime);border-color:var(--lime);color:#0A0C10}
+  .pill .psub{display:block;font-size:9.5px;font-weight:600;opacity:.7;margin-top:1px}
+  .selall{width:100%;margin-bottom:12px;padding:11px 14px;border-radius:12px;font-weight:700;font-size:13.5px;
+    background:var(--panel2);border:1px solid var(--border);color:var(--muted);transition:all .18s}
+  .selall.on{background:var(--limeDim);border-color:rgba(168,255,62,.45);color:var(--lime)}
+  .gauge{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:18px 18px 16px}
+  .gbig{font-family:var(--mono);font-size:38px;font-weight:700;line-height:1}
+  .gsm{font-family:var(--mono);color:var(--faint);font-size:16px}
+  .track{position:relative;height:12px;border-radius:7px;background:#0d1117;overflow:hidden;margin-bottom:4px}
+  .fill{height:100%;border-radius:7px;transition:width .4s ease}
+  .notch{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--text);opacity:.85}
+  .stat{flex:1;min-width:92px}
+  .stat .lab{display:flex;align-items:center;gap:5px;color:var(--muted);font-size:11px;letter-spacing:.4px;text-transform:uppercase}
+  .stat .val{font-family:var(--mono);color:var(--text);font-size:17px;margin:3px 0 5px}
+  .stat .val .t{color:var(--faint);font-size:12px}
+  .strack{position:relative;height:5px;border-radius:3px;background:#0d1117;overflow:hidden}
+  .stgt{position:absolute;top:-1px;bottom:-1px;width:1px;background:var(--faint)}
+  .fuel{display:flex;align-items:center;gap:10px;width:100%;margin-top:12px;padding:11px 14px;border-radius:12px;text-align:left;
+    background:var(--panel2);border:1px solid var(--border)}
+  .fuel.on{background:var(--limeDim);border-color:rgba(168,255,62,.4)}
+  .ghead{display:flex;justify-content:space-between;align-items:flex-start;margin:20px 0 4px;gap:12px}
+  .gh{display:flex;align-items:center;gap:8px}
+  .gh .dot{width:6px;height:6px;border-radius:2px}
+  .gh .t{color:var(--muted);font-size:11.5px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700}
+  .gmac{font-family:var(--mono);font-size:11px;color:var(--faint);margin:4px 0 0 14px}
+  .gtot{font-family:var(--mono);font-size:15px;font-weight:700;white-space:nowrap;color:var(--text);
+    border:1px solid var(--border);border-radius:8px;padding:5px 9px;transition:all .18s}
+  .gtot.sel{color:#0A0C10;background:var(--lime);border-color:var(--lime)}
+  .item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:10px;margin-top:6px;
+    background:var(--panel2);border:1px solid var(--border);transition:background .2s,border-color .2s}
+  .item.on{background:var(--limeDim);border-color:rgba(168,255,62,.4)}
+  .itoggle{display:flex;align-items:center;gap:11px;flex:1;min-width:0;text-align:left;background:none}
+  .box{width:20px;height:20px;border-radius:6px;flex-shrink:0;display:grid;place-items:center;border:1px solid var(--faint)}
+  .item.on .box{background:var(--lime);border-color:var(--lime)}
+  .box svg{display:none} .item.on .box svg{display:block}
+  .ilab{min-width:0}
+  .ilab .n{display:block;color:var(--text);font-size:13.5px;line-height:1.25}
+  .swi{color:var(--faint);font-size:12px;margin-left:6px;vertical-align:1px}
+  .ilab .hint{display:block;font-size:10px;color:var(--faint);line-height:1.3;margin-top:1px}
+  .ilab .m{display:block;font-family:var(--mono);font-size:11px;color:var(--faint);margin-top:2px}
+  .step{display:flex;align-items:center;gap:5px;flex-shrink:0}
+  .step button{width:26px;height:26px;border-radius:7px;background:var(--raised);border:1px solid var(--border);color:var(--text);font-size:17px;line-height:1;display:grid;place-items:center}
+  .step .amt{font-family:var(--mono);font-size:11.5px;color:var(--muted);min-width:46px;text-align:center}
+  .swap{margin-top:6px;padding:5px;border-radius:11px;background:var(--panel);border:1px solid rgba(168,255,62,.28)}
+  .swaphd{font-size:10px;letter-spacing:1.2px;text-transform:uppercase;color:var(--muted);padding:5px 9px 6px;display:flex;justify-content:space-between}
+  .swapopt{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;padding:9px 10px;border-radius:8px;text-align:left}
+  .swapopt+.swapopt{margin-top:2px}
+  .swapopt:active{background:var(--panel2)}
+  .swapopt .sn{font-size:13px;color:var(--text)}
+  .swapopt .sm{font-family:var(--mono);font-size:11px;color:var(--faint);white-space:nowrap}
+  .note{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:14px;font-size:12px;color:var(--muted);line-height:1.5}
+  .shop{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:11px 12px;border-radius:10px;margin-top:7px;
+    background:var(--panel);border:1px solid var(--border)}
+  .shop.on{background:var(--limeDim);border-color:rgba(168,255,62,.35)}
+  .shop .s{color:var(--text);font-size:14px}
+  .shop.on .s{color:var(--muted);text-decoration:line-through}
+  .ctable{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-top:8px}
+  .crow{display:flex;align-items:center;padding:9px 13px}
+  .crow+.crow{border-top:1px solid var(--border)}
+  .crow .cn{flex:1;font-size:13.5px}
+  .crow .cp{font-family:var(--mono);font-size:12px;color:var(--muted);width:74px;text-align:right}
+  .crow .cc{font-family:var(--mono);font-size:12px;color:var(--faint);width:58px;text-align:right}
+  .crow .cpp{font-family:var(--mono);font-size:12.5px;color:var(--lime);width:44px;text-align:right}
+  .rule{display:flex;gap:12px;padding:10px 13px;border-radius:10px;margin-top:7px;background:var(--panel);border:1px solid var(--border)}
+  .rule .num{font-family:var(--mono);color:var(--amber);font-size:12px;font-weight:700}
+  .rule .rt{font-size:13px;color:var(--text);line-height:1.45}
+  .foot{font-family:var(--mono);font-size:10.5px;color:var(--faint);margin-top:22px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* ---------- food catalog (values at base amount; cals rounded up on use; sw = swap group) ---------- */
+var FOODS={
+ eggwhites:{n:"Egg whites",unit:"g",step:25,base:125,cal:70,p:13.5,c:1,f:0},
+ wholeegg:{n:"Whole egg",unit:"egg",step:1,base:1,cal:75,p:6.3,c:0.4,f:5},
+ ffcheese:{n:"Fat-free shredded cheese",hint:"about \u00bc cup at base",unit:"g",step:14,base:28,cal:48,p:9,c:2,f:0},
+ cbacon:{n:"Canadian bacon coins",unit:"coins",step:1,base:3,cal:66,p:10.5,c:1,f:1.5},
+ oats:{n:"Instant oats, dry",hint:"\u00be cup at base",unit:"g",step:20,base:60,cal:230,p:7.5,c:40,f:4,sw:"grain"},
+ bananaFuel:{n:"Banana",unit:"medium",step:1,base:1,cal:115,p:1.3,c:27,f:0.4,sw:"fruit"},
+ scoop:{n:"Protein shake",unit:"scoop",step:1,base:1,cal:125,p:24,c:3,f:2,sw:"sprot"},
+ yogurt:{n:"Nonfat Greek yogurt",hint:"\u00be cup at base",unit:"g",step:25,base:200,cal:130,p:20,c:8,f:0,sw:"sprot"},
+ blueberries:{n:"Blueberries",hint:"1 cup at base",unit:"g",step:20,base:140,cal:80,p:1,c:20,f:0,sw:"fruit"},
+ treat:{n:"Treat \u2014 Bomb pop / Drizzilicious / SmartFood",unit:"\u00d7",step:1,base:1,cal:130,p:1,c:24,f:3},
+ chicken:{n:"Chicken breast",unit:"oz",step:1,base:6,cal:290,p:52,c:0,f:8,sw:"meat"},
+ steak:{n:"London broil, marinated",unit:"oz",step:1,base:5,cal:310,p:31,c:6,f:16,sw:"meat"},
+ turkey:{n:"Ground turkey 93/7",unit:"oz",step:1,base:5,cal:240,p:35,c:0,f:11,sw:"meat"},
+ salmon:{n:"Salmon",unit:"oz",step:1,base:5,cal:310,p:34,c:0,f:18,sw:"meat"},
+ tilapia:{n:"Tilapia",unit:"oz",step:1,base:6,cal:190,p:36,c:0,f:3,sw:"meat"},
+ shrimp:{n:"Shrimp",unit:"oz",step:1,base:6,cal:180,p:36,c:0,f:3,sw:"meat"},
+ sirloin:{n:"Top sirloin",unit:"oz",step:1,base:5,cal:290,p:40,c:2,f:12,sw:"meat"},
+ beef96:{n:"Lean ground beef 96/4",unit:"oz",step:1,base:5,cal:230,p:38,c:0,f:8,sw:"meat"},
+ pork:{n:"Pork tenderloin",unit:"oz",step:1,base:5,cal:210,p:38,c:0,f:6,sw:"meat"},
+ cod:{n:"Cod",unit:"oz",step:1,base:6,cal:180,p:38,c:0,f:2,sw:"meat"},
+ sweetpot:{n:"Sweet potato",unit:"g",step:25,base:150,cal:135,p:2,c:31,f:0,sw:"grain"},
+ rice:{n:"Jasmine rice, cooked",hint:"about 1 cup at base",unit:"g",step:25,base:175,cal:230,p:4,c:50,f:0,sw:"grain"},
+ quinoa:{n:"Quinoa, cooked",hint:"\u00be cup at base",unit:"g",step:25,base:140,cal:180,p:6,c:32,f:3,sw:"grain"},
+ ppasta:{n:"Protein pasta + marinara",hint:"3 oz dry at base",unit:"g",step:15,base:85,cal:320,p:22,c:54,f:4,sw:"grain"},
+ potato:{n:"Potato, cooked",unit:"g",step:25,base:175,cal:160,p:4,c:37,f:0,sw:"grain"},
+ ricecakes:{n:"Rice cakes",unit:"cake",step:1,base:2,cal:70,p:1,c:15,f:0,sw:"grain"},
+ corntort:{n:"Corn tortillas",unit:"tortilla",step:1,base:2,cal:120,p:3,c:24,f:1.5,sw:"grain"},
+ blackbeans:{n:"Black beans",hint:"\u00bd cup at base",unit:"g",step:25,base:85,cal:95,p:6,c:17,f:0,sw:"grain"},
+ greeksalad:{n:"Greek salad",hint:"romaine, cucumber, tomato, red onion + 40g feta, 8 olives, \u00bd tbsp olive oil + red-wine vinegar",unit:"\u00d7",step:0.5,base:1,cal:255,p:9,c:15,f:21,sw:"veg"},
+ broccoli:{n:"Broccoli",unit:"g",step:25,base:150,cal:55,p:4,c:9,f:0,sw:"veg"},
+ greenbean:{n:"Green beans",unit:"g",step:25,base:150,cal:45,p:2,c:9,f:0,sw:"veg"},
+ asparagus:{n:"Asparagus",unit:"g",step:25,base:150,cal:45,p:3,c:8,f:0,sw:"veg"},
+ zucchini:{n:"Zucchini",unit:"g",step:25,base:150,cal:45,p:2,c:8,f:0,sw:"veg"},
+ peppers:{n:"Roasted bell peppers",unit:"g",step:25,base:150,cal:55,p:2,c:11,f:0,sw:"veg"},
+ stirveg:{n:"Stir-fry veg",unit:"g",step:25,base:150,cal:70,p:3,c:12,f:1,sw:"veg"},
+ slaw:{n:"Cabbage slaw",hint:"light dressing",unit:"g",step:25,base:100,cal:60,p:1,c:8,f:3,sw:"veg"},
+ cauliflower:{n:"Cauliflower",unit:"g",step:25,base:150,cal:40,p:3,c:8,f:0,sw:"veg"},
+ brussels:{n:"Brussels sprouts",unit:"g",step:25,base:150,cal:65,p:4,c:12,f:1,sw:"veg"},
+ spinach:{n:"Saut\u00e9ed spinach",unit:"g",step:25,base:150,cal:70,p:4,c:6,f:4,sw:"veg"},
+ sidesalad:{n:"Side garden salad, light",unit:"\u00d7",step:0.5,base:1,cal:70,p:2,c:9,f:3,sw:"veg"},
+ salsa:{n:"Salsa",unit:"g",step:20,base:60,cal:20,p:1,c:4,f:0},
+ chilibase:{n:"Chili tomato & pepper base",unit:"g",step:25,base:200,cal:90,p:3,c:18,f:1},
+ cottage:{n:"Low-fat cottage cheese",hint:"\u00be cup at base",unit:"g",step:25,base:200,cal:170,p:24,c:8,f:5,sw:"sprot"},
+ apple:{n:"Apple",unit:"medium",step:1,base:1,cal:100,p:0.5,c:26,f:0,sw:"fruit"},
+ strawberries:{n:"Strawberries",unit:"g",step:20,base:150,cal:55,p:1,c:13,f:0,sw:"fruit"},
+ orange:{n:"Orange",unit:"medium",step:1,base:1,cal:75,p:1,c:18,f:0,sw:"fruit"},
+ peach:{n:"Peach",unit:"medium",step:1,base:1,cal:70,p:1.5,c:17,f:0,sw:"fruit"},
+ cherries:{n:"Cherries",unit:"g",step:20,base:140,cal:90,p:1.5,c:22,f:0,sw:"fruit"},
+ skyr:{n:"Skyr / Icelandic yogurt",unit:"g",step:25,base:170,cal:110,p:19,c:7,f:0,sw:"sprot"},
+ pbar:{n:"Protein bar",unit:"bar",step:1,base:1,cal:210,p:20,c:22,f:7,sw:"sprot"}
+};
+var BF=["eggwhites","wholeegg","ffcheese","cbacon","oats"];
+var SN=["scoop","yogurt","blueberries"];
+var DAYS=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+var WEEKS=[
+ {tag:"Uses your inventory",days:{
+   Mon:{lunch:["chicken","sweetpot","greeksalad"],dinner:["steak","ppasta","broccoli"]},
+   Tue:{lunch:["steak","rice","greenbean"],dinner:["chicken","sweetpot","greeksalad"]},
+   Wed:{lunch:["chicken","ppasta","greeksalad"],dinner:["steak","rice","broccoli"]},
+   Thu:{lunch:["steak","greeksalad","ricecakes"],dinner:["chicken","sweetpot","greenbean"]},
+   Fri:{lunch:["chicken","rice","greeksalad"],dinner:["steak","ppasta","broccoli"]},
+   Sat:{lunch:["steak","sweetpot","broccoli"],dinner:["chicken","rice","greeksalad"]},
+   Sun:{lunch:["chicken","ppasta","greeksalad"],dinner:["steak","sweetpot","greenbean"]}}},
+ {tag:"Turkey \u00b7 fish rotation",days:{
+   Mon:{lunch:["chicken","rice","broccoli"],dinner:["turkey","rice","blackbeans","salsa"]},
+   Tue:{lunch:["turkey","rice","blackbeans","salsa"],dinner:["tilapia","sweetpot","greenbean","rice"]},
+   Wed:{lunch:["chicken","rice","greeksalad"],dinner:["turkey","peppers","rice"]},
+   Thu:{lunch:["tilapia","rice","broccoli"],dinner:["chicken","sweetpot","greeksalad"]},
+   Fri:{lunch:["turkey","rice","stirveg"],dinner:["tilapia","corntort","slaw","rice"]},
+   Sat:{lunch:["chicken","ppasta","greeksalad"],dinner:["turkey","chilibase","blackbeans","rice"]},
+   Sun:{lunch:["turkey","chilibase","blackbeans","rice"],dinner:["chicken","sweetpot","broccoli"]}}},
+ {tag:"Full variety",days:{
+   Mon:{lunch:["chicken","rice","asparagus"],dinner:["salmon","sweetpot","zucchini"]},
+   Tue:{lunch:["shrimp","stirveg","rice"],dinner:["sirloin","greeksalad","ricecakes"]},
+   Wed:{lunch:["chicken","sweetpot","broccoli"],dinner:["salmon","rice","asparagus"]},
+   Thu:{lunch:["sirloin","rice","greenbean"],dinner:["chicken","ppasta","greeksalad"]},
+   Fri:{lunch:["shrimp","stirveg","rice"],dinner:["sirloin","sweetpot","greeksalad"]},
+   Sat:{lunch:["chicken","rice","zucchini"],dinner:["salmon","quinoa","asparagus"]},
+   Sun:{lunch:["cottage","blueberries","ricecakes","greeksalad"],dinner:["chicken","sweetpot","broccoli","rice"]}}}
+];
+var SHOPPING=[
+ {have:"Already stocked: London broil, chicken, sweet potatoes, protein pasta, oats, protein powder, fruit, breakfast staples.",
+  items:["Egg whites \u2014 large carton","Nonfat Greek yogurt \u2014 1 tub","Blueberries","Feta + kalamata olives (for Greek salad)","Romaine, cucumber, red onion","Frozen broccoli","Frozen green beans","Jasmine rice OR 3\u20134 more sweet potatoes","Bananas (6)","Olive oil + red-wine vinegar","Canned diced tomatoes"]},
+ {have:"Restock breakfast staples as needed.",
+  items:["Chicken breast \u2014 4 lb","Ground turkey 93/7 \u2014 2 lb","Tilapia or cod \u2014 1.5 lb","Nonfat Greek yogurt \u2014 1 tub","Eggs + egg whites","Jasmine rice","Sweet potatoes (5)","Corn tortillas","Salsa","Black beans (2 cans)","Bell peppers","Frozen stir-fry veg","Coleslaw mix","Feta + olives","Bananas + blueberries"]},
+ {have:"Salmon runs higher fat \u2014 bank it into the day's fat budget.",
+  items:["Chicken breast \u2014 3 lb","Top sirloin or flank \u2014 1.5 lb","Salmon \u2014 1.25 lb (2 fillets)","Shrimp \u2014 1 lb","Greek yogurt + low-fat cottage cheese","Eggs + egg whites","Rice + quinoa","Sweet potatoes (5)","Asparagus, zucchini, bell peppers","Frozen stir-fry veg","Feta + olives, salad veg","Rice cakes","Blueberries + bananas"]}
+];
+var CHEAT=[["Chicken breast","6 oz",290,52],["London broil","5 oz",310,31],["Ground turkey 93/7","5 oz",240,35],["Salmon","5 oz",310,34],["Tilapia","6 oz",190,36],["Shrimp","6 oz",180,36],["Top sirloin","5 oz",290,40],["Protein shake","1 scoop",125,24],["Greek yogurt","200g",130,20],["Protein pasta","3 oz dry",320,22],["Greek salad","1 serving",255,9],["Sweet potato","150g",135,2],["Instant oats","60g dry",230,8],["Jasmine rice","175g ckd",230,4]];
+var RULES=[
+ "Full day, everything checked, lands about 2,300 cal \u2014 your 0.75\u20131 lb/week loss zone.",
+ "Calorie values are rounded up on purpose. Assume a little more is on the plate than you'd guess.",
+ "Tap \u2212 / + on any item to change the portion \u2014 calories and macros update live.",
+ "Tap a food's name (look for \u21c4) to swap it for a similar one at a similar amount.",
+ "Tap a category's calorie pill to select or clear that whole category at once.",
+ "Hit protein first (~180g), fill the rest with carbs, keep fat moderate.",
+ "Long-run day \u2192 flip the fuel toggle to add a banana. Rest day \u2192 drop a snack or trim a portion."
+];
+var T={p:180,cal:2300,c:250,f:65};
+
+/* ---------- state + persistence ---------- */
+var LS="fuelprotocol:v3";
+var S={tab:"days",wk:0,day:"Mon",checks:{},shopChecks:{},fuelDays:{},amts:{},repl:{},openSwap:null};
+try{var raw=localStorage.getItem(LS);if(raw){var o=JSON.parse(raw);S.checks=o.checks||{};S.shopChecks=o.shopChecks||{};S.fuelDays=o.fuelDays||{};S.amts=o.amts||{};S.repl=o.repl||{};}}catch(e){}
+function save(){try{localStorage.setItem(LS,JSON.stringify({checks:S.checks,shopChecks:S.shopChecks,fuelDays:S.fuelDays,amts:S.amts,repl:S.repl}));}catch(e){}}
+
+var CK='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0A0C10" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+var ZAP='<svg width="20" height="20" viewBox="0 0 24 24" fill="#A8FF3E"><path d="M13 2L4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5z"/></svg>';
+
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function dayKey(){return S.wk+"-"+S.day;}
+function bfKeys(){return S.fuelDays[dayKey()]?BF.concat(["bananaFuel"]):BF;}
+function keysFor(gid){
+  var rot=WEEKS[S.wk].days[S.day];
+  if(gid==="bf")return bfKeys();
+  if(gid==="ln")return rot.lunch;
+  if(gid==="dn")return rot.dinner;
+  if(gid==="sn")return SN;
+  return ["treat"];
+}
+function effKeyAt(gid,i){var orig=keysFor(gid)[parseInt(i,10)];var iid=dayKey()+"-"+gid+"-"+i;return S.repl[iid]||orig;}
+function scaled(key,amt){var f=FOODS[key],s=amt/f.base;return{cal:f.cal*s,p:f.p*s,c:f.c*s,f:f.f*s};}
+function fmtAmt(key,amt){var f=FOODS[key];if(f.unit==="g")return amt+"g";if(f.unit==="\u00d7")return amt+"\u00d7";return amt+" "+f.unit;}
+function swapOptions(key){var sw=FOODS[key].sw;if(!sw)return[];return Object.keys(FOODS).filter(function(k){return FOODS[k].sw===sw&&k!==key;});}
+
+function dayGroups(){
+  var defs=[
+    {id:"bf",title:"Breakfast",accent:"var(--amber)"},
+    {id:"ln",title:"Lunch",accent:"var(--lime)"},
+    {id:"dn",title:"Dinner",accent:"var(--blue)"},
+    {id:"sn",title:"Snacks",accent:"var(--violet)"},
+    {id:"tr",title:"Treat",accent:"var(--pink)"}
+  ];
+  return defs.map(function(g){
+    g.items=keysFor(g.id).map(function(orig,i){
+      var iid=dayKey()+"-"+g.id+"-"+i;
+      var key=S.repl[iid]||orig;
+      var f=FOODS[key];
+      var amt=S.amts[iid]!=null?S.amts[iid]:f.base;
+      return {key:key,i:i,gid:g.id,iid:iid,amt:amt,m:scaled(key,amt),on:!!S.checks[iid]};
+    });
+    return g;
+  });
+}
+function sumItems(items,onlyOn){
+  var t={cal:0,p:0,c:0,f:0};
+  items.forEach(function(it){if(!onlyOn||it.on){t.cal+=it.m.cal;t.p+=it.m.p;t.c+=it.m.c;t.f+=it.m.f;}});
+  return t;
+}
+
+/* ---------- render pieces ---------- */
+function statBar(lab,val,tgt,color,unit){
+  var pct=Math.min(val/(tgt*1.15),1)*100, tp=(1/1.15)*100;
+  return '<div class="stat"><div class="lab">'+lab+'</div>'+
+    '<div class="val"><span style="color:'+color+'">'+Math.round(val)+'</span><span class="t"> /'+tgt+unit+'</span></div>'+
+    '<div class="strack"><div class="stgt" style="left:'+tp+'%"></div><div class="fill" style="height:100%;width:'+pct+'%;background:'+color+';border-radius:3px"></div></div></div>';
+}
+function itemRow(it){
+  var f=FOODS[it.key];
+  var hint=f.hint?'<span class="hint">'+esc(f.hint)+'</span>':'';
+  var swi=f.sw?'<span class="swi">\u21c4</span>':'';
+  var togAct=f.sw?'label':'toggle';
+  var h='<div class="item'+(it.on?' on':'')+'">'+
+    '<button class="itoggle" data-act="'+togAct+'" data-g="'+it.gid+'" data-i="'+it.i+'">'+
+      '<span class="box" data-act="toggle" data-g="'+it.gid+'" data-i="'+it.i+'">'+CK+'</span>'+
+      '<span class="ilab"><span class="n">'+esc(f.n)+swi+'</span>'+hint+
+        '<span class="m">'+Math.ceil(it.m.cal)+' cal \u00b7 '+Math.round(it.m.p)+'p \u00b7 '+Math.round(it.m.c)+'c \u00b7 '+Math.round(it.m.f)+'f</span></span>'+
+    '</button>'+
+    '<div class="step">'+
+      '<button data-act="dec" data-g="'+it.gid+'" data-i="'+it.i+'">\u2212</button>'+
+      '<span class="amt">'+fmtAmt(it.key,it.amt)+'</span>'+
+      '<button data-act="inc" data-g="'+it.gid+'" data-i="'+it.i+'">+</button>'+
+    '</div></div>';
+  if(S.openSwap===it.iid){
+    var opts=swapOptions(it.key);
+    h+='<div class="swap"><div class="swaphd"><span>Swap to a similar food</span><span>tap to close</span></div>';
+    opts.forEach(function(kk){var f2=FOODS[kk];
+      h+='<button class="swapopt" data-act="swapto" data-g="'+it.gid+'" data-i="'+it.i+'" data-key="'+kk+'">'+
+         '<span class="sn">'+esc(f2.n)+'</span><span class="sm">'+fmtAmt(kk,f2.base)+' \u00b7 '+f2.cal+' cal \u00b7 '+f2.p+'p</span></button>';
+    });
+    h+='</div>';
+  }
+  return h;
+}
+function pills(list,activeIdx,act,subs){
+  return list.map(function(x,i){
+    return '<button class="pill'+(i===activeIdx?' on':'')+'" data-act="'+act+'" data-v="'+i+'">'+x+
+      (subs?'<span class="psub">'+subs[i]+'</span>':'')+'</button>';
+  }).join("");
+}
+
+function renderDays(){
+  var groups=dayGroups();
+  var all=[]; groups.forEach(function(g){all=all.concat(g.items);});
+  var sel=sumItems(all,true);
+  var allSel=all.length>0 && all.every(function(it){return it.on;});
+  var calMax=2600, calPct=Math.min(sel.cal/calMax,1)*100, calTgtPct=(T.cal/calMax)*100;
+  var over=sel.cal>T.cal;
+
+  var h="";
+  h+='<div class="row" style="margin-bottom:10px">'+pills(["Week 1","Week 2","Week 3"],S.wk,"wk",WEEKS.map(function(w){return w.tag;}))+'</div>';
+  h+='<div class="row" style="margin-bottom:16px">'+pills(DAYS,DAYS.indexOf(S.day),"day")+'</div>';
+
+  h+='<button class="selall'+(allSel?' on':'')+'" data-act="selall">'+(allSel?'\u2713 Whole day selected \u2014 tap to clear':'\u26a1 Select all meals \u2014 see the day total')+'</button>';
+
+  h+='<div class="gauge" style="'+(over?'border-color:rgba(255,125,156,.5);box-shadow:0 0 30px rgba(255,125,156,.10)':'')+'">'+
+     '<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:10px">'+
+       '<span class="gbig" style="color:'+(over?'var(--pink)':'var(--amber)')+'">'+Math.round(sel.cal).toLocaleString()+'</span><span class="gsm">/ '+T.cal.toLocaleString()+' cal</span></div>'+
+     '<div class="track"><div class="fill" style="width:'+calPct+'%;background:linear-gradient(90deg,#c07a1e,var(--amber))"></div><div class="notch" style="left:'+calTgtPct+'%"></div></div>'+
+     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">'+
+       '<span style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">0</span>'+
+       '<span style="font-family:var(--mono);font-size:10.5px;color:'+(over?'var(--pink)':'var(--muted)')+'">'+(over?(Math.round(sel.cal)-T.cal).toLocaleString()+' over':(T.cal-Math.round(sel.cal)).toLocaleString()+' cal left')+'</span>'+
+       '<span style="font-family:var(--mono);font-size:10.5px;color:var(--faint)">'+calMax.toLocaleString()+'</span></div>'+
+     '<div class="row" style="gap:16px">'+
+       statBar("Protein",sel.p,T.p,"var(--lime)","g")+statBar("Carbs",sel.c,T.c,"var(--blue)","g")+statBar("Fat",sel.f,T.f,"var(--violet)","g")+
+     '</div></div>';
+
+  var fuel=!!S.fuelDays[dayKey()];
+  h+='<button class="fuel'+(fuel?' on':'')+'" data-act="fuel"><span style="font-size:16px">\ud83c\udf5e</span>'+
+     '<span style="flex:1;font-size:13px;color:var(--text)">Long-run / heavy-lift day <span style="color:var(--faint);font-size:11.5px">\u2014 adds a banana to breakfast</span></span>'+
+     '<span style="font-family:var(--mono);font-size:11px;font-weight:700;color:'+(fuel?'var(--lime)':'var(--faint)')+'">'+(fuel?"ON":"OFF")+'</span></button>';
+
+  groups.forEach(function(g){
+    var tot=sumItems(g.items,false);
+    var catSel=g.items.length>0 && g.items.every(function(it){return it.on;});
+    h+='<div class="ghead"><div>'+
+         '<div class="gh"><span class="dot" style="background:'+g.accent+'"></span><span class="t">'+g.title+'</span></div>'+
+         '<div class="gmac">'+Math.round(tot.p)+'p \u00b7 '+Math.round(tot.c)+'c \u00b7 '+Math.round(tot.f)+'f</div>'+
+       '</div><button class="gtot'+(catSel?' sel':'')+'" data-act="selcat" data-g="'+g.id+'">'+Math.ceil(tot.cal).toLocaleString()+' cal</button></div>';
+    g.items.forEach(function(it){h+=itemRow(it);});
+  });
+
+  h+='<p class="foot">Tap a name (\u21c4) to swap a food. Tap a category\u2019s calorie pill to select that whole block. Amounts are cooked-weight defaults with calories rounded up \u2014 tap \u2212 / + to match your plate.</p>';
+  return h;
+}
+function renderShop(){
+  var h='<div class="row" style="margin-bottom:16px">'+pills(["Week 1","Week 2","Week 3"],S.wk,"wk")+'</div>';
+  h+='<div class="note">'+esc(SHOPPING[S.wk].have)+'</div>';
+  SHOPPING[S.wk].items.forEach(function(it,i){
+    var on=!!S.shopChecks[S.wk+"-"+i];
+    h+='<button class="shop'+(on?' on':'')+'" data-act="shop" data-i="'+i+'"><span class="box">'+CK+'</span><span class="s">'+esc(it)+'</span></button>';
+  });
+  return h;
+}
+function renderRef(){
+  var h='<div class="ghead"><div class="gh"><span class="dot" style="background:var(--lime)"></span><span class="t">Protein anchors \u2014 base portions</span></div></div><div class="ctable">';
+  CHEAT.forEach(function(r){h+='<div class="crow"><span class="cn">'+esc(r[0])+'</span><span class="cp">'+esc(r[1])+'</span><span class="cc">'+r[2]+' cal</span><span class="cpp">'+r[3]+'p</span></div>';});
+  h+='</div>';
+  h+='<div class="ghead"><div class="gh"><span class="dot" style="background:var(--amber)"></span><span class="t">How it works</span></div></div>';
+  RULES.forEach(function(r,i){h+='<div class="rule"><span class="num">'+("0"+(i+1)).slice(-2)+'</span><span class="rt">'+esc(r)+'</span></div>';});
+  return h;
+}
+function render(){
+  var TABS=[["days","Days"],["shop","Shopping"],["ref","Reference"]];
+  var h='<h1>'+ZAP+'FUEL PROTOCOL <span class="dim">\u00b7 3-Week Cut</span></h1>';
+  h+='<p class="sub">headline target ~2,300 cal \u00b7 180g protein \u00b7 0.75\u20131 lb/wk @ 180 lb</p>';
+  h+='<div class="row" style="margin-bottom:18px">'+TABS.map(function(t){return '<button class="tab'+(S.tab===t[0]?' on':'')+'" data-act="tab" data-v="'+t[0]+'">'+t[1]+'</button>';}).join("")+'</div>';
+  h+= S.tab==="days"?renderDays():S.tab==="shop"?renderShop():renderRef();
+  document.getElementById("app").innerHTML=h;
+}
+
+/* ---------- events ---------- */
+document.getElementById("app").addEventListener("click",function(e){
+  var el=e.target.closest("[data-act]");if(!el)return;
+  var act=el.getAttribute("data-act");
+  var g=el.getAttribute("data-g"), i=el.getAttribute("data-i");
+  if(act==="tab"){S.tab=el.getAttribute("data-v");S.openSwap=null;}
+  else if(act==="wk"){S.wk=parseInt(el.getAttribute("data-v"),10);S.openSwap=null;}
+  else if(act==="day"){S.day=DAYS[parseInt(el.getAttribute("data-v"),10)];S.openSwap=null;}
+  else if(act==="toggle"){var id=dayKey()+"-"+g+"-"+i;S.checks[id]=!S.checks[id];save();}
+  else if(act==="label"){var lid=dayKey()+"-"+g+"-"+i;S.openSwap=(S.openSwap===lid)?null:lid;}
+  else if(act==="swapto"){var sid=dayKey()+"-"+g+"-"+i;S.repl[sid]=el.getAttribute("data-key");delete S.amts[sid];S.openSwap=null;save();}
+  else if(act==="fuel"){var d=dayKey();S.fuelDays[d]=!S.fuelDays[d];save();}
+  else if(act==="shop"){var sk=S.wk+"-"+i;S.shopChecks[sk]=!S.shopChecks[sk];save();}
+  else if(act==="inc"||act==="dec"){
+    var key=effKeyAt(g,i),f=FOODS[key],iid=dayKey()+"-"+g+"-"+i;
+    var cur=S.amts[iid]!=null?S.amts[iid]:f.base;
+    var nv=cur+(act==="inc"?f.step:-f.step);
+    nv=Math.max(f.step,Math.round(nv*100)/100);
+    S.amts[iid]=nv;save();
+  }
+  else if(act==="selcat"){
+    var ks=keysFor(g),iids=ks.map(function(_,idx){return dayKey()+"-"+g+"-"+idx;});
+    var allSel=iids.every(function(id){return S.checks[id];});
+    iids.forEach(function(id){if(allSel)delete S.checks[id];else S.checks[id]=true;});
+    save();
+  }
+  else if(act==="selall"){
+    var groups=dayGroups(),all=[];groups.forEach(function(gr){all=all.concat(gr.items);});
+    var aSel=all.every(function(it){return it.on;});
+    all.forEach(function(it){if(aSel)delete S.checks[it.iid];else S.checks[it.iid]=true;});
+    save();
+  }
+  render();
+});
+render();
+</script>
+</body>
+</html>
