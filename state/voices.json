@@ -1,0 +1,8 @@
+{
+  "_note": "Voice picks from the user. Not yet auditioned or saved to the series cast. IDs are ElevenLabs voice_ids.",
+  "MILOSH": {"voice_id": "IGRoDkfYV2Frq7Ly0PRu", "status": "user liked for Milosh, 'maybe'; audition before locking"},
+  "UNASSIGNED": [
+    {"voice_id": "Tj9l48J9AJbry5yCP5eW", "status": "user liked for 'a character'; role not yet chosen (ask which)"}
+  ],
+  "music": "royalty-free library (decided by user); ElevenLabs connector has no music"
+}
